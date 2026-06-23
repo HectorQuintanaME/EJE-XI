@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Lienzo de Dibujo Interactivo</title>
+    <!-- CSS: Utilizamos Tailwind CSS para una estilización rápida y moderna (similar a Google) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* CSS ADICIONAL: Estilos que no cubre Tailwind o que requieren ajustes específicos */
+        body {
+            /* Evita que la pantalla se desplace mientras dibujas en móviles */
+            overscroll-behavior: none;
+            touch-action: none;
+        }
+        
+        #drawing-canvas {
+            cursor: crosshair; /* Cambia el cursor a una cruz para dar sensación de precisión */
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+
+        /* Estilo para simular las ventanas modales de Google */
+        .google-modal {
+            box-shadow: 0 24px 38px 3px rgba(0,0,0,0.14), 0 9px 46px 8px rgba(0,0,0,0.12), 0 11px 15px -7px rgba(0,0,0,0.2);
+            border-radius: 8px;
+        }
+
+        /* Ocultar elementos visualmente */
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body class="bg-gray-100 h-screen w-screen overflow-hidden flex flex-col font-sans">
+
+    <!-- ========================================== -->
+    <!-- 1. MODAL DE TÉRMINOS Y CONDICIONES         -->
+    <!-- ========================================== -->
+    <div id="tc-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 transition-opacity">
+        <div class="bg-white google-modal p-8 max-w-md w-11/12 text-gray-800">
+            <h2 class="text-2xl font-normal mb-4">Términos y Condiciones</h2>
+            <div class="text-sm text-gray-600 mb-6 h-40 overflow-y-auto border border-gray-200 p-3 rounded">
+                <p class="mb-2">Bienvenido a nuestra plataforma de dibujo.</p>
+                <p class="mb-2">Al utilizar esta herramienta, aceptas que los dibujos realizados serán almacenados en nuestros servidores para análisis y uso en proyectos creativos posteriores.</p>
+                <p>Por favor, asegúrate de no compartir información personal o sensible a través de tus dibujos. (Aquí podrás agregar tu aviso legal completo en el futuro).</p>
+            </div>
+            <div class="flex justify-end">
+                <button id="btn-accept-tc" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded transition-colors">
+                    Aceptar y Comenzar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 2. INTERFAZ PRINCIPAL DE DIBUJO            -->
+    <!-- ========================================== -->
+    <div id="app-container" class="hidden flex-col h-full w-full relative">
+        
+        <!-- Barra de herramientas superior -->
+        <div class="bg-white shadow-md p-3 flex flex-wrap gap-4 items-center justify-between z-10">
+            
+            <!-- Selector de Colores (Primordiales) -->
+            <div class="flex items-center gap-2">
+                <span class="text-sm font-semibold text-gray-600">Color:</span>
+                <input type="color" id="color-picker" value="#000000" class="w-10 h-10 rounded cursor-pointer border-none p-0">
+                <!-- Botones rápidos de colores primarios -->
+                <div class="hidden sm:flex gap-1 ml-2">
+                    <button class="color-btn w-8 h-8 rounded-full bg-black border-2 border-gray-300" data-color="#000000"></button>
+                    <button class="color-btn w-8 h-8 rounded-full bg-red-600 border-2 border-transparent hover:scale-110" data-color="#dc2626"></button>
+                    <button class="color-btn w-8 h-8 rounded-full bg-blue-600 border-2 border-transparent hover:scale-110" data-color="#2563eb"></button>
+                    <button class="color-btn w-8 h-8 rounded-full bg-yellow-400 border-2 border-transparent hover:scale-110" data-color="#facc15"></button>
+                    <button class="color-btn w-8 h-8 rounded-full bg-green-600 border-2 border-transparent hover:scale-110" data-color="#16a34a"></button>
+                    <button class="color-btn w-8 h-8 rounded-full bg-white border-2 border-gray-300 hover:scale-110" data-color="#ffffff" title="Borrador"></button>
+                </div>
+            </div>
+
+            <!-- Selector de Grosor del pincel -->
+            <div class="flex items-center gap-2">
+                <span class="text-sm font-semibold text-gray-600">Grosor:</span>
+                <input type="range" id="brush-size" min="1" max="50" value="5" class="w-24 sm:w-32 cursor-pointer">
+                <span id="brush-size-label" class="text-xs text-gray-500 w-4">5</span>
+            </div>
+
+            <!-- Botones de Acción (Reiniciar y Terminar) -->
+            <div class="flex gap-2">
+                <button id="btn-clear" class="bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm font-medium py-2 px-4 rounded transition-colors">
+                    Reiniciar
+                </button>
+                <button id="btn-finish" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded transition-colors shadow flex items-center gap-2">
+                    <span>Terminar</span>
+                    <!-- Spinner de carga oculto por defecto -->
+                    <svg id="loading-spinner" class="animate-spin h-4 w-4 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Contenedor del Lienzo -->
+        <div class="flex-1 bg-gray-200 relative w-full h-full" id="canvas-container">
+            <canvas id="drawing-canvas" class="absolute top-0 left-0 bg-white"></canvas>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 3. MODAL DE RESULTADOS (Personalidad)      -->
+    <!-- ========================================== -->
+    <div id="result-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+        <div class="bg-white google-modal p-8 max-w-md w-11/12 text-center text-gray-800">
+            <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            </div>
+            <h2 class="text-2xl font-bold mb-2">¡Dibujo Registrado!</h2>
+            <p class="text-gray-600 mb-6">Hemos analizado tu arte. Tu personalidad creativa es:</p>
+            
+            <!-- Contenedor de las 3 palabras mágicas -->
+            <div id="personality-words" class="flex flex-wrap justify-center gap-3 mb-8">
+                <!-- Se llenará con JavaScript -->
+            </div>
+            
+            <button id="btn-restart-app" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded transition-colors">
+                Dibujar de nuevo
+            </button>
+        </div>
+    </div>
+
+    <script type="module">
+        // Importamos la librería de Supabase directamente como un módulo de JavaScript
+        import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+        // ==========================================
+        // 1. CONFIGURACIÓN DEL SERVIDOR (SUPABASE)
+        // ==========================================
+        // Reemplaza estas comillas con los datos exactos que te da Supabase en:
+        // Project Settings -> API
+        const SUPABASE_URL = "https://ntsaqqpisjgnomjtwrde.supabase.co"; 
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50c2FxcXBpc2pnbm9tanR3cmRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxNzc0NzYsImV4cCI6MjA5Nzc1MzQ3Nn0.iumOtitiidlJnrNn8mJ8sBaqds_5Js3gtjHFngkUfOE";
+
+        // Inicializamos la conexión con tu base de datos
+        const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // ==========================================
+        // 2. BASE DE DATOS DE PERSONALIDAD
+        // ==========================================
+        const rasgosPersonalidad = [
+            "Feliz", "Triste", "Enojón", "Comelón", "Furioso", "Asustado", 
+            "Creativo", "Soñador", "Caótico", "Meticuloso", "Misterioso", 
+            "Valiente", "Relajado", "Dramático", "Curioso", "Energético"
+        ];
+
+        // ==========================================
+        // 3. VARIABLES DEL LIENZO Y ESTADO
+        // ==========================================
+        const canvas = document.getElementById('drawing-canvas');
+        const ctx = canvas.getContext('2d');
+        const canvasContainer = document.getElementById('canvas-container');
+
+        let isDrawing = false;
+        let x = 0;
+        let y = 0;
+        let currentColor = '#000000';
+        let currentBrushSize = 5;
+
+        // ==========================================
+        // 4. ELEMENTOS DEL DOM (Interfaz)
+        // ==========================================
+        const tcModal = document.getElementById('tc-modal');
+        const btnAcceptTC = document.getElementById('btn-accept-tc');
+        const appContainer = document.getElementById('app-container');
+        const colorPicker = document.getElementById('color-picker');
+        const colorBtns = document.querySelectorAll('.color-btn');
+        const brushSize = document.getElementById('brush-size');
+        const brushSizeLabel = document.getElementById('brush-size-label');
+        const btnClear = document.getElementById('btn-clear');
+        const btnFinish = document.getElementById('btn-finish');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const resultModal = document.getElementById('result-modal');
+        const personalityWordsContainer = document.getElementById('personality-words');
+        const btnRestartApp = document.getElementById('btn-restart-app');
+
+        // ==========================================
+        // LÓGICA DE INTERFAZ Y MODALES
+        // ==========================================
+
+        // Aceptar Términos
+        btnAcceptTC.addEventListener('click', () => {
+            tcModal.classList.add('hidden');
+            appContainer.classList.remove('hidden');
+            appContainer.classList.add('flex');
+            resizeCanvas(); // Ajustamos el tamaño del lienzo al abrir
+        });
+
+        // ==========================================
+        // LÓGICA DEL LIENZO (CANVAS)
+        // ==========================================
+
+        function resizeCanvas() {
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            canvas.width = canvasContainer.clientWidth;
+            canvas.height = canvasContainer.clientHeight;
+            
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            if(imageData) ctx.putImageData(imageData, 0, 0);
+
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+        }
+
+        window.addEventListener('resize', () => {
+            if(!appContainer.classList.contains('hidden')) resizeCanvas();
+        });
+
+        const startDrawing = (e) => {
+            isDrawing = true;
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.clientX || e.touches[0].clientX;
+            const clientY = e.clientY || e.touches[0].clientY;
+            
+            x = clientX - rect.left;
+            y = clientY - rect.top;
+            
+            ctx.beginPath();
+            ctx.fillStyle = currentColor;
+            ctx.arc(x, y, currentBrushSize / 2, 0, Math.PI * 2);
+            ctx.fill();
+        };
+
+        const draw = (e) => {
+            if (!isDrawing) return;
+            e.preventDefault(); 
+            
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.clientX || e.touches[0].clientX;
+            const clientY = e.clientY || e.touches[0].clientY;
+            
+            const newX = clientX - rect.left;
+            const newY = clientY - rect.top;
+
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(newX, newY);
+            ctx.strokeStyle = currentColor;
+            ctx.lineWidth = currentBrushSize;
+            ctx.stroke();
+
+            x = newX;
+            y = newY;
+        };
+
+        const stopDrawing = () => {
+            isDrawing = false;
+        };
+
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+
+        canvas.addEventListener('touchstart', startDrawing, { passive: false });
+        canvas.addEventListener('touchmove', draw, { passive: false });
+        canvas.addEventListener('touchend', stopDrawing);
+
+        // ==========================================
+        // CONTROLES DE HERRAMIENTAS
+        // ==========================================
+
+        colorPicker.addEventListener('input', (e) => {
+            currentColor = e.target.value;
+        });
+
+        colorBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                currentColor = e.target.dataset.color;
+                colorPicker.value = currentColor;
+            });
+        });
+
+        brushSize.addEventListener('input', (e) => {
+            currentBrushSize = e.target.value;
+            brushSizeLabel.textContent = currentBrushSize;
+        });
+
+        btnClear.addEventListener('click', () => {
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        });
+
+        // ==========================================
+        // GUARDADO EN SERVIDOR SUPABASE Y FINALIZACIÓN
+        // ==========================================
+
+        function generarPersonalidad() {
+            const mezclado = [...rasgosPersonalidad].sort(() => 0.5 - Math.random());
+            return mezclado.slice(0, 3);
+        }
+
+        btnFinish.addEventListener('click', async () => {
+            // 1. Mostrar estado de carga
+            btnFinish.disabled = true;
+            loadingSpinner.classList.remove('hidden');
+
+            try {
+                // 2. Convertir el lienzo a un archivo real (Blob)
+                canvas.toBlob(async (blob) => {
+                    if (!blob) {
+                        throw new Error("No se pudo procesar la imagen del lienzo.");
+                    }
+
+                    // 3. Crear un nombre único para el archivo basado en la fecha y un número aleatorio
+                    const nombreArchivo = `dibujo_${Date.now()}_${Math.floor(Math.random() * 1000)}.jpg`;
+
+                    // 4. Subir la imagen a la carpeta "dibujos-usuarios" en Supabase Storage
+                    const { data, error } = await supabase.storage
+                        .from('dibujos-usuarios') // Asegúrate de que el bucket se llame así
+                        .upload(nombreArchivo, blob, {
+                            contentType: 'image/jpeg',
+                            upsert: false // No sobreescribir archivos existentes
+                        });
+
+                    if (error) {
+                        console.error("Error de Supabase:", error.message);
+                        alert("Hubo un problema guardando el dibujo: " + error.message);
+                        btnFinish.disabled = false;
+                        loadingSpinner.classList.add('hidden');
+                        return;
+                    }
+
+                    console.log("¡Dibujo guardado exitosamente en Supabase!", data);
+
+                    const palabras = generarPersonalidad();
+                    
+                    personalityWordsContainer.innerHTML = '';
+                    palabras.forEach(palabra => {
+                        const span = document.createElement('span');
+                        span.className = "px-4 py-2 bg-blue-100 text-blue-800 font-semibold rounded-full text-lg shadow-sm";
+                        span.textContent = palabra;
+                        personalityWordsContainer.appendChild(span);
+                    });
+
+                    // 6. Mostramos el resultado final
+                    resultModal.classList.remove('hidden');
+                    
+                    // Apagamos el loader
+                    btnFinish.disabled = false;
+                    loadingSpinner.classList.add('hidden');
+
+                }, 'image/jpeg', 0.8); // 0.8 es la calidad de la imagen para que no pese mucho
+
+            } catch (error) {
+                console.error("Error inesperado: ", error);
+                alert("Ocurrió un error. Inténtalo de nuevo.");
+                btnFinish.disabled = false;
+                loadingSpinner.classList.add('hidden');
+            }
+        });
+
+        // Botón "Dibujar de nuevo"
+        btnRestartApp.addEventListener('click', () => {
+            window.location.reload();
+        });
+
+</script>
+</body>
+</html>
