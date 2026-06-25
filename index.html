@@ -7,7 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
-
             overscroll-behavior: none;
             touch-action: none;
         }
@@ -32,7 +31,7 @@
             <div class="text-sm text-gray-600 mb-6 h-40 overflow-y-auto border border-gray-200 p-3 rounded">
                 <p class="mb-2">Bienvenido a nuestra plataforma de dibujo.</p>
                 <p class="mb-2">Al utilizar esta herramienta, aceptas que los dibujos realizados serán almacenados en nuestros servidores para análisis y uso en proyectos creativos posteriores.</p>
-                <p>Por favor, asegúrate de no compartir información personal o sensible a través de tus dibujos.    </p>
+                <p>Por favor, asegúrate de no compartir información personal o sensible a través de tus dibujos.</p>
             </div>
             <div class="flex justify-end">
                 <button id="btn-accept-tc" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded transition-colors">
@@ -47,7 +46,7 @@
         <div class="bg-white shadow-md p-3 flex flex-wrap gap-4 items-center justify-between z-10">
 
             <div class="flex items-center gap-2">
-                <span class="text-sm font-semibold text-gray-600">Color:</span>
+                <span class="text-sm font-semibold text-gray-600">Pincel:</span>
                 <input type="color" id="color-picker" value="#000000" class="w-10 h-10 rounded cursor-pointer border-none p-0">
                 <div class="hidden sm:flex gap-1 ml-2">
                     <button class="color-btn w-8 h-8 rounded-full bg-black border-2 border-gray-300" data-color="#000000"></button>
@@ -55,8 +54,12 @@
                     <button class="color-btn w-8 h-8 rounded-full bg-blue-600 border-2 border-transparent hover:scale-110" data-color="#2563eb"></button>
                     <button class="color-btn w-8 h-8 rounded-full bg-yellow-400 border-2 border-transparent hover:scale-110" data-color="#facc15"></button>
                     <button class="color-btn w-8 h-8 rounded-full bg-green-600 border-2 border-transparent hover:scale-110" data-color="#16a34a"></button>
-                    <button class="color-btn w-8 h-8 rounded-full bg-white border-2 border-gray-300 hover:scale-110" data-color="#ffffff" title="Borrador"></button>
                 </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <span class="text-sm font-semibold text-gray-600">Fondo:</span>
+                <input type="color" id="bg-color-picker" value="#ffffff" class="w-10 h-10 rounded cursor-pointer border border-gray-300 p-0">
             </div>
 
             <div class="flex items-center gap-2">
@@ -67,11 +70,10 @@
 
             <div class="flex gap-2">
                 <button id="btn-clear" class="bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm font-medium py-2 px-4 rounded transition-colors">
-                    Reiniciar
+                    Limpiar
                 </button>
                 <button id="btn-finish" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded transition-colors shadow flex items-center gap-2">
                     <span>Terminar</span>
-
                     <svg id="loading-spinner" class="animate-spin h-4 w-4 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -81,7 +83,7 @@
         </div>
 
         <div class="flex-1 bg-gray-200 relative w-full h-full" id="canvas-container">
-            <canvas id="drawing-canvas" class="absolute top-0 left-0 bg-white"></canvas>
+            <canvas id="drawing-canvas" class="absolute top-0 left-0 bg-transparent"></canvas>
         </div>
     </div>
 
@@ -103,16 +105,12 @@
     </div>
 
     <script type="module">
-   
         import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-
 
         const SUPABASE_URL = "https://ntsaqqpisjgnomjtwrde.supabase.co"; 
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50c2FxcXBpc2pnbm9tanR3cmRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxNzc0NzYsImV4cCI6MjA5Nzc1MzQ3Nn0.iumOtitiidlJnrNn8mJ8sBaqds_5Js3gtjHFngkUfOE";
-
         const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  
         const rasgosPersonalidad = [
             "Feliz", "Triste", "Enojón", "Comelón", "Furioso", "Asustado", 
             "Creativo", "Soñador", "Caótico", "Meticuloso", "Misterioso", 
@@ -128,11 +126,13 @@
         let y = 0;
         let currentColor = '#000000';
         let currentBrushSize = 5;
+        let currentBgColor = '#ffffff'; 
 
         const tcModal = document.getElementById('tc-modal');
         const btnAcceptTC = document.getElementById('btn-accept-tc');
         const appContainer = document.getElementById('app-container');
         const colorPicker = document.getElementById('color-picker');
+        const bgColorPicker = document.getElementById('bg-color-picker');
         const colorBtns = document.querySelectorAll('.color-btn');
         const brushSize = document.getElementById('brush-size');
         const brushSizeLabel = document.getElementById('brush-size-label');
@@ -143,6 +143,7 @@
         const personalityWordsContainer = document.getElementById('personality-words');
         const btnRestartApp = document.getElementById('btn-restart-app');
 
+        canvas.style.backgroundColor = currentBgColor;
 
         btnAcceptTC.addEventListener('click', () => {
             tcModal.classList.add('hidden');
@@ -155,9 +156,7 @@
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             canvas.width = canvasContainer.clientWidth;
             canvas.height = canvasContainer.clientHeight;
-            
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
             if(imageData) ctx.putImageData(imageData, 0, 0);
 
             ctx.lineCap = 'round';
@@ -168,6 +167,44 @@
             if(!appContainer.classList.contains('hidden')) resizeCanvas();
         });
 
+        const drawSymmetricPoint = (px, py) => {
+            const w = canvas.width;
+            const h = canvas.height;
+            const points = [
+                {x: px, y: py},               
+                {x: w - px, y: py},          
+                {x: px, y: h - py},           
+                {x: w - px, y: h - py} 
+            ];
+            
+            points.forEach(p => {
+                ctx.beginPath();
+                ctx.fillStyle = currentColor;
+                ctx.arc(p.x, p.y, currentBrushSize / 2, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        };
+
+        const drawSymmetricLine = (x1, y1, x2, y2) => {
+            const w = canvas.width;
+            const h = canvas.height;
+            const lines = [
+                {sx: x1, sy: y1, ex: x2, ey: y2},                    
+                {sx: w - x1, sy: y1, ex: w - x2, ey: y2},           
+                {sx: x1, sy: h - y1, ex: x2, ey: h - y2},            
+                {sx: w - x1, sy: h - y1, ex: w - x2, ey: h - y2}      
+            ];
+
+            lines.forEach(l => {
+                ctx.beginPath();
+                ctx.moveTo(l.sx, l.sy);
+                ctx.lineTo(l.ex, l.ey);
+                ctx.strokeStyle = currentColor;
+                ctx.lineWidth = currentBrushSize;
+                ctx.stroke();
+            });
+        };
+
         const startDrawing = (e) => {
             isDrawing = true;
             const rect = canvas.getBoundingClientRect();
@@ -177,10 +214,7 @@
             x = clientX - rect.left;
             y = clientY - rect.top;
             
-            ctx.beginPath();
-            ctx.fillStyle = currentColor;
-            ctx.arc(x, y, currentBrushSize / 2, 0, Math.PI * 2);
-            ctx.fill();
+            drawSymmetricPoint(x, y);
         };
 
         const draw = (e) => {
@@ -194,12 +228,7 @@
             const newX = clientX - rect.left;
             const newY = clientY - rect.top;
 
-            ctx.beginPath();
-            ctx.moveTo(x, y);
-            ctx.lineTo(newX, newY);
-            ctx.strokeStyle = currentColor;
-            ctx.lineWidth = currentBrushSize;
-            ctx.stroke();
+            drawSymmetricLine(x, y, newX, newY);
 
             x = newX;
             y = newY;
@@ -218,8 +247,14 @@
         canvas.addEventListener('touchmove', draw, { passive: false });
         canvas.addEventListener('touchend', stopDrawing);
 
+
         colorPicker.addEventListener('input', (e) => {
             currentColor = e.target.value;
+        });
+
+        bgColorPicker.addEventListener('input', (e) => {
+            currentBgColor = e.target.value;
+            canvas.style.backgroundColor = currentBgColor;
         });
 
         colorBtns.forEach(btn => {
@@ -235,8 +270,7 @@
         });
 
         btnClear.addEventListener('click', () => {
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
         });
 
         function generarPersonalidad() {
@@ -249,7 +283,15 @@
             loadingSpinner.classList.remove('hidden');
 
             try {
-                canvas.toBlob(async (blob) => {
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = canvas.width;
+                tempCanvas.height = canvas.height;
+                const tempCtx = tempCanvas.getContext('2d');
+                tempCtx.fillStyle = currentBgColor;
+                tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+                tempCtx.drawImage(canvas, 0, 0);
+
+                tempCanvas.toBlob(async (blob) => {
                     if (!blob) {
                         throw new Error("No se pudo procesar la imagen del lienzo.");
                     }
@@ -295,10 +337,11 @@
                 loadingSpinner.classList.add('hidden');
             }
         });
+
         btnRestartApp.addEventListener('click', () => {
             window.location.reload();
         });
 
-</script>
+    </script>
 </body>
 </html>
