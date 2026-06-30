@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lienzo de Dibujo Interactivo</title>
+    <title>Lienzo de Dibujo Interactivo - Caleidoscopio</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -13,8 +13,8 @@
         
         #drawing-canvas {
             cursor: crosshair;
-            box-shadow: 0 0 15px rgba(0,0,0,0.1);
         }
+        
         .google-modal {
             box-shadow: 0 24px 38px 3px rgba(0,0,0,0.14), 0 9px 46px 8px rgba(0,0,0,0.12), 0 11px 15px -7px rgba(0,0,0,0.2);
             border-radius: 8px;
@@ -23,15 +23,16 @@
         .hidden { display: none !important; }
     </style>
 </head>
-<body class="bg-gray-100 h-screen w-screen overflow-hidden flex flex-col font-sans">
+<body class="bg-gray-900 h-screen w-screen overflow-hidden flex flex-col font-sans">
 
-    <div id="tc-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 transition-opacity">
+    <div id="tc-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 transition-opacity">
         <div class="bg-white google-modal p-8 max-w-md w-11/12 text-gray-800">
             <h2 class="text-2xl font-normal mb-4">Términos y Condiciones</h2>
             <div class="text-sm text-gray-600 mb-6 h-40 overflow-y-auto border border-gray-200 p-3 rounded">
-                <p class="mb-2">Bienvenido a nuestra plataforma de dibujo.</p>
+                <p class="mb-2">Bienvenido a la experiencia Caleidoscopio.</p>
+                <p class="mb-2">Intenta replicar la imagen de fondo usando las herramientas de simetría y fusión. Al terminar, tu arte base será evaluado.</p>
                 <p class="mb-2">Al utilizar esta herramienta, aceptas que los dibujos realizados serán almacenados en nuestros servidores para análisis y uso en proyectos creativos posteriores.</p>
-                <p>Por favor, asegúrate de no compartir información personal o sensible a través de tus dibujos.</p>
+                <p>Por favor, asegúrate de no compartir información personal o sensible.</p>
             </div>
             <div class="flex justify-end">
                 <button id="btn-accept-tc" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded transition-colors">
@@ -43,29 +44,39 @@
 
     <div id="app-container" class="hidden flex-col h-full w-full relative">
 
-        <div class="bg-white shadow-md p-3 flex flex-wrap gap-4 items-center justify-between z-10">
+        <div class="bg-white shadow-md p-3 flex flex-wrap gap-x-6 gap-y-3 items-center justify-between z-20">
 
-            <div class="flex items-center gap-2">
-                <span class="text-sm font-semibold text-gray-600">Pincel:</span>
-                <input type="color" id="color-picker" value="#000000" class="w-10 h-10 rounded cursor-pointer border-none p-0">
-                <div class="hidden sm:flex gap-1 ml-2">
-                    <button class="color-btn w-8 h-8 rounded-full bg-black border-2 border-gray-300" data-color="#000000"></button>
-                    <button class="color-btn w-8 h-8 rounded-full bg-red-600 border-2 border-transparent hover:scale-110" data-color="#dc2626"></button>
-                    <button class="color-btn w-8 h-8 rounded-full bg-blue-600 border-2 border-transparent hover:scale-110" data-color="#2563eb"></button>
-                    <button class="color-btn w-8 h-8 rounded-full bg-yellow-400 border-2 border-transparent hover:scale-110" data-color="#facc15"></button>
-                    <button class="color-btn w-8 h-8 rounded-full bg-green-600 border-2 border-transparent hover:scale-110" data-color="#16a34a"></button>
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-semibold text-gray-600">Pincel:</span>
+                    <input type="color" id="color-picker" value="#00e5ff" class="w-8 h-8 rounded cursor-pointer border border-gray-300 p-0">
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-semibold text-gray-600">Fondo:</span>
+                    <input type="color" id="bg-color-picker" value="#0b0f19" class="w-8 h-8 rounded cursor-pointer border border-gray-300 p-0">
                 </div>
             </div>
 
-            <div class="flex items-center gap-2">
-                <span class="text-sm font-semibold text-gray-600">Fondo:</span>
-                <input type="color" id="bg-color-picker" value="#ffffff" class="w-10 h-10 rounded cursor-pointer border border-gray-300 p-0">
-            </div>
+            <div class="flex flex-wrap items-center gap-4">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-semibold text-gray-600" title="Transparencia de la imagen a replicar">Fondo Guía:</span>
+                    <input type="range" id="bg-opacity" min="0" max="1" step="0.05" value="0.5" class="w-20 cursor-pointer">
+                </div>
+                
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-semibold text-gray-600">Opacidad Pincel:</span>
+                    <input type="range" id="brush-opacity" min="0.05" max="1" step="0.05" value="0.8" class="w-20 cursor-pointer">
+                </div>
 
-            <div class="flex items-center gap-2">
-                <span class="text-sm font-semibold text-gray-600">Grosor:</span>
-                <input type="range" id="brush-size" min="1" max="50" value="5" class="w-24 sm:w-32 cursor-pointer">
-                <span id="brush-size-label" class="text-xs text-gray-500 w-4">5</span>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-semibold text-gray-600">Grosor:</span>
+                    <input type="range" id="brush-size" min="1" max="50" value="5" class="w-20 cursor-pointer">
+                </div>
+
+                <label class="flex items-center gap-1 text-xs font-semibold text-purple-700 bg-purple-100 px-3 py-1.5 rounded cursor-pointer hover:bg-purple-200 transition-colors">
+                    <input type="checkbox" id="fusion-mode" class="cursor-pointer" checked>
+                    Efecto Fusión/Neón
+                </label>
             </div>
 
             <div class="flex gap-2">
@@ -82,24 +93,28 @@
             </div>
         </div>
 
-        <div class="flex-1 bg-gray-200 relative w-full h-full" id="canvas-container">
-            <canvas id="drawing-canvas" class="absolute top-0 left-0 bg-transparent"></canvas>
+        <div class="flex-1 relative w-full h-full overflow-hidden" id="canvas-container">
+            <div id="bg-color-layer" class="absolute inset-0 transition-colors duration-300"></div>
+            
+            <img id="reference-img" class="absolute inset-0 w-full h-full object-cover pointer-events-none z-0" style="opacity: 0.5;" />
+            
+            <canvas id="drawing-canvas" class="absolute top-0 left-0 bg-transparent z-10 w-full h-full"></canvas>
         </div>
     </div>
 
-    <div id="result-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+    <div id="result-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
         <div class="bg-white google-modal p-8 max-w-md w-11/12 text-center text-gray-800">
             <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
             </div>
-            <h2 class="text-2xl font-bold mb-2">¡Dibujo Registrado!</h2>
-            <p class="text-gray-600 mb-6">Hemos analizado tu arte. Tu personalidad creativa es:</p>
+            <h2 class="text-2xl font-bold mb-2">¡Obra Registrada!</h2>
+            <p class="text-gray-600 mb-6">Hemos analizado tu arte. Tu perfil creativo es:</p>
 
             <div id="personality-words" class="flex flex-wrap justify-center gap-3 mb-8">
             </div>
             
             <button id="btn-restart-app" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded transition-colors">
-                Dibujar de nuevo
+                Intentar otro fondo
             </button>
         </div>
     </div>
@@ -111,41 +126,44 @@
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50c2FxcXBpc2pnbm9tanR3cmRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxNzc0NzYsImV4cCI6MjA5Nzc1MzQ3Nn0.iumOtitiidlJnrNn8mJ8sBaqds_5Js3gtjHFngkUfOE";
         const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        const rasgosPersonalidad = [
-            "Feliz", "Triste", "Enojón", "Comelón", "Furioso", "Asustado", 
-            "Creativo", "Soñador", "Caótico", "Meticuloso", "Misterioso", 
-            "Valiente", "Relajado", "Dramático", "Curioso", "Energético"
-        ];
+        const listaEstadoAnimo = ["Alegre", "Melancólico", "Relajado", "Enojón", "Pacífico", "Furioso"];
+        const listaEnfoque = ["Creativo", "Lógico", "Soñador", "Realista", "Caótico", "Meticuloso"];
+        const listaEnergia = ["Energético", "Calmado", "Valiente", "Cauteloso", "Curioso", "Indiferente"];
 
         const canvas = document.getElementById('drawing-canvas');
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
         const canvasContainer = document.getElementById('canvas-container');
 
         let isDrawing = false;
-        let x = 0;
-        let y = 0;
-        let currentColor = '#000000';
+        let currentColor = '#00e5ff'; 
+        let currentBgColor = '#0b0f19';
         let currentBrushSize = 5;
-        let currentBgColor = '#ffffff'; 
+        let currentBrushOpacity = 0.8;
+        let isFusionActive = true;
+
+        let rawX = 0, rawY = 0;
+        let smoothX = 0, smoothY = 0;
+        let animationFrameId;
 
         const tcModal = document.getElementById('tc-modal');
-        const btnAcceptTC = document.getElementById('btn-accept-tc');
         const appContainer = document.getElementById('app-container');
         const colorPicker = document.getElementById('color-picker');
         const bgColorPicker = document.getElementById('bg-color-picker');
-        const colorBtns = document.querySelectorAll('.color-btn');
+        const bgOpacitySlider = document.getElementById('bg-opacity');
+        const brushOpacitySlider = document.getElementById('brush-opacity');
         const brushSize = document.getElementById('brush-size');
-        const brushSizeLabel = document.getElementById('brush-size-label');
+        const fusionModeCheckbox = document.getElementById('fusion-mode');
         const btnClear = document.getElementById('btn-clear');
         const btnFinish = document.getElementById('btn-finish');
-        const loadingSpinner = document.getElementById('loading-spinner');
-        const resultModal = document.getElementById('result-modal');
-        const personalityWordsContainer = document.getElementById('personality-words');
-        const btnRestartApp = document.getElementById('btn-restart-app');
+        const bgColorLayer = document.getElementById('bg-color-layer');
+        const referenceImg = document.getElementById('reference-img');
 
-        canvas.style.backgroundColor = currentBgColor;
+        bgColorLayer.style.backgroundColor = currentBgColor;
 
-        btnAcceptTC.addEventListener('click', () => {
+        const randomBgNum = Math.floor(Math.random() * 15) + 1;
+        referenceImg.src = `caleidoscopios/c${randomBgNum}.jpg`;
+
+        document.getElementById('btn-accept-tc').addEventListener('click', () => {
             tcModal.classList.add('hidden');
             appContainer.classList.remove('hidden');
             appContainer.classList.add('flex');
@@ -167,29 +185,49 @@
             if(!appContainer.classList.contains('hidden')) resizeCanvas();
         });
 
+        const hexToRGBA = (hex, opacity) => {
+            const r = parseInt(hex.slice(1, 3), 16);
+            const g = parseInt(hex.slice(3, 5), 16);
+            const b = parseInt(hex.slice(5, 7), 16);
+            return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+        };
+
+        const applyBrushStyles = () => {
+            const colorRGBA = hexToRGBA(currentColor, currentBrushOpacity);
+            ctx.strokeStyle = colorRGBA;
+            ctx.fillStyle = colorRGBA;
+            ctx.lineWidth = currentBrushSize;
+
+            if (isFusionActive) {
+                ctx.shadowBlur = currentBrushSize * 2.5;
+                ctx.shadowColor = currentColor;
+                ctx.globalCompositeOperation = 'screen';
+            } else {
+                ctx.shadowBlur = 0;
+                ctx.globalCompositeOperation = 'source-over'; 
+            }
+        };
         const drawSymmetricPoint = (px, py) => {
+            applyBrushStyles();
             const w = canvas.width;
             const h = canvas.height;
             const points = [
-                {x: px, y: py},               
-                {x: w - px, y: py},          
-                {x: px, y: h - py},           
-                {x: w - px, y: h - py} 
+                {x: px, y: py}, {x: w - px, y: py}, {x: px, y: h - py}, {x: w - px, y: h - py} 
             ];
             
             points.forEach(p => {
                 ctx.beginPath();
-                ctx.fillStyle = currentColor;
                 ctx.arc(p.x, p.y, currentBrushSize / 2, 0, Math.PI * 2);
                 ctx.fill();
             });
         };
 
         const drawSymmetricLine = (x1, y1, x2, y2) => {
+            applyBrushStyles();
             const w = canvas.width;
             const h = canvas.height;
             const lines = [
-                {sx: x1, sy: y1, ex: x2, ey: y2},                    
+                {sx: x1, sy: y1, ex: x2, ey: y2},                     
                 {sx: w - x1, sy: y1, ex: w - x2, ey: y2},           
                 {sx: x1, sy: h - y1, ex: x2, ey: h - y2},            
                 {sx: w - x1, sy: h - y1, ex: w - x2, ey: h - y2}      
@@ -199,43 +237,51 @@
                 ctx.beginPath();
                 ctx.moveTo(l.sx, l.sy);
                 ctx.lineTo(l.ex, l.ey);
-                ctx.strokeStyle = currentColor;
-                ctx.lineWidth = currentBrushSize;
                 ctx.stroke();
             });
+        };
+
+        const renderSmooth = () => {
+            if (!isDrawing) return;
+            
+            const dx = rawX - smoothX;
+            const dy = rawY - smoothY;
+            
+            if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
+  
+                const nx = smoothX + dx * 0.55; 
+                const ny = smoothY + dy * 0.55;
+                drawSymmetricLine(smoothX, smoothY, nx, ny);
+                smoothX = nx;
+                smoothY = ny;
+            }
+            animationFrameId = requestAnimationFrame(renderSmooth);
         };
 
         const startDrawing = (e) => {
             isDrawing = true;
             const rect = canvas.getBoundingClientRect();
-            const clientX = e.clientX || e.touches[0].clientX;
-            const clientY = e.clientY || e.touches[0].clientY;
+            rawX = (e.clientX || e.touches[0].clientX) - rect.left;
+            rawY = (e.clientY || e.touches[0].clientY) - rect.top;
             
-            x = clientX - rect.left;
-            y = clientY - rect.top;
+            smoothX = rawX;
+            smoothY = rawY;
             
-            drawSymmetricPoint(x, y);
+            drawSymmetricPoint(smoothX, smoothY);
+            animationFrameId = requestAnimationFrame(renderSmooth);
         };
 
         const draw = (e) => {
             if (!isDrawing) return;
             e.preventDefault(); 
-            
             const rect = canvas.getBoundingClientRect();
-            const clientX = e.clientX || e.touches[0].clientX;
-            const clientY = e.clientY || e.touches[0].clientY;
-            
-            const newX = clientX - rect.left;
-            const newY = clientY - rect.top;
-
-            drawSymmetricLine(x, y, newX, newY);
-
-            x = newX;
-            y = newY;
+            rawX = (e.clientX || e.touches[0].clientX) - rect.left;
+            rawY = (e.clientY || e.touches[0].clientY) - rect.top;
         };
 
         const stopDrawing = () => {
             isDrawing = false;
+            cancelAnimationFrame(animationFrameId);
         };
 
         canvas.addEventListener('mousedown', startDrawing);
@@ -247,36 +293,32 @@
         canvas.addEventListener('touchmove', draw, { passive: false });
         canvas.addEventListener('touchend', stopDrawing);
 
-
-        colorPicker.addEventListener('input', (e) => {
-            currentColor = e.target.value;
-        });
-
+        colorPicker.addEventListener('input', (e) => currentColor = e.target.value);
+        
         bgColorPicker.addEventListener('input', (e) => {
             currentBgColor = e.target.value;
-            canvas.style.backgroundColor = currentBgColor;
+            bgColorLayer.style.backgroundColor = currentBgColor;
         });
 
-        colorBtns.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                currentColor = e.target.dataset.color;
-                colorPicker.value = currentColor;
-            });
-        });
-
-        brushSize.addEventListener('input', (e) => {
-            currentBrushSize = e.target.value;
-            brushSizeLabel.textContent = currentBrushSize;
-        });
+        bgOpacitySlider.addEventListener('input', (e) => referenceImg.style.opacity = e.target.value);
+        brushOpacitySlider.addEventListener('input', (e) => currentBrushOpacity = e.target.value);
+        brushSize.addEventListener('input', (e) => currentBrushSize = e.target.value);
+        fusionModeCheckbox.addEventListener('change', (e) => isFusionActive = e.target.checked);
 
         btnClear.addEventListener('click', () => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         });
 
         function generarPersonalidad() {
-            const mezclado = [...rasgosPersonalidad].sort(() => 0.5 - Math.random());
-            return mezclado.slice(0, 3);
+            const p1 = listaEstadoAnimo[Math.floor(Math.random() * listaEstadoAnimo.length)];
+            const p2 = listaEnfoque[Math.floor(Math.random() * listaEnfoque.length)];
+            const p3 = listaEnergia[Math.floor(Math.random() * listaEnergia.length)];
+            return [p1, p2, p3];
         }
+
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const resultModal = document.getElementById('result-modal');
+        const personalityWordsContainer = document.getElementById('personality-words');
 
         btnFinish.addEventListener('click', async () => {
             btnFinish.disabled = true;
@@ -287,14 +329,15 @@
                 tempCanvas.width = canvas.width;
                 tempCanvas.height = canvas.height;
                 const tempCtx = tempCanvas.getContext('2d');
+                
                 tempCtx.fillStyle = currentBgColor;
                 tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+
                 tempCtx.drawImage(canvas, 0, 0);
 
                 tempCanvas.toBlob(async (blob) => {
-                    if (!blob) {
-                        throw new Error("No se pudo procesar la imagen del lienzo.");
-                    }
+                    if (!blob) throw new Error("No se pudo procesar la imagen del lienzo.");
+                    
                     const nombreArchivo = `dibujo_${Date.now()}_${Math.floor(Math.random() * 1000)}.jpg`;
                     const { data, error } = await supabase.storage
                         .from('dibujos-usuarios') 
@@ -318,13 +361,12 @@
                     personalityWordsContainer.innerHTML = '';
                     palabras.forEach(palabra => {
                         const span = document.createElement('span');
-                        span.className = "px-4 py-2 bg-blue-100 text-blue-800 font-semibold rounded-full text-lg shadow-sm";
+                        span.className = "px-4 py-2 bg-purple-100 text-purple-800 font-semibold rounded-full text-lg shadow-sm";
                         span.textContent = palabra;
                         personalityWordsContainer.appendChild(span);
                     });
 
                     resultModal.classList.remove('hidden');
-
                     btnFinish.disabled = false;
                     loadingSpinner.classList.add('hidden');
 
@@ -338,7 +380,7 @@
             }
         });
 
-        btnRestartApp.addEventListener('click', () => {
+        document.getElementById('btn-restart-app').addEventListener('click', () => {
             window.location.reload();
         });
 
