@@ -1,17 +1,165 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-	<meta charset="utf-8">
-	<title>Trabajo libre</title>
-    <link rel="stylesheet" href="style.css">
-
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
-    <script src="https://unpkg.com/ml5@1/dist/ml5.js"></script>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interacción de Manos y Fondo</title>
+  
+  <!-- Librería p5.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+  <!-- Librería ml5.js (Versión actual para handPose) -->
+  <script src="https://unpkg.com/ml5@1/dist/ml5.min.js"></script>
+  
+  <style>
+    /* Reseteamos los márgenes para que el canvas ocupe toda la pantalla sin barras de scroll */
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: #ffffff; /* Fondo blanco general */
+      font-family: sans-serif;
+    }
+    canvas {
+      display: block;
+    }
+  </style>
 </head>
-
 <body>
-	<script src="sketch2.js"></script>
-</body>
+  <script>
+    let wallpaper;
+    let handPose;
+    let video;
+    let hands = [];
 
+    // Nombres de tus fondos
+    let fondos = ['w1.jpg'];
+    let fondoSeleccionado;
+
+    function preload() {
+      // Inicializamos el detector de manos
+      handPose = ml5.handPose();
+      
+      // Seleccionamos un nombre de archivo al azar
+      fondoSeleccionado = random(fondos);
+      
+      // ======================================================================
+      // ATENCIÓN: PARA TUS IMÁGENES LOCALES, DESCOMENTA LA SIGUIENTE LÍNEA:
+      wallpaper = loadImage('/assets/' + fondoSeleccionado);
+      // ======================================================================
+      
+      // (Para esta demostración web, cargo una imagen aleatoria con tu misma proporción 1920x885)
+      //let demoId = floor(random(1, 100));
+      //wallpaper = loadImage(`https://picsum.photos/seed/${demoId}/1920/885`);
+    }
+
+    function setup() {
+      // El canvas ocupa toda la ventana
+      createCanvas(windowWidth, windowHeight);
+      
+      // Configuramos el video
+      video = createCapture(VIDEO);
+      video.size(windowWidth, windowHeight);
+      video.hide();
+      
+      // Empezamos la detección
+      handPose.detectStart(video, gotHands);
+      
+      angleMode(DEGREES);
+      imageMode(CENTER); // Dibujar imágenes desde el centro facilita la rotación
+    }
+
+    function draw() {
+      background(255); // Fondo blanco base
+      
+      // 1. CALCULAR DIMENSIONES DE LA IMAGEN (Manteniendo proporción 1920x885)
+      let proporcion = 885 / 1920;
+      let imgAncho = width;
+      let imgAlto = width * proporcion;
+      
+      // 2. MOVIMIENTO ESTÉTICO BASE (Automático)
+      // frameCount nos da un número que aumenta siempre. sin() crea un vaivén suave (-1 a 1).
+      let escalaBase = 1 + sin(frameCount * 0.5) * 0.03; // "Respiración" lenta
+      let anguloBase = sin(frameCount * 0.2) * 1.5;      // Balanceo sutil
+
+      // 3. INTERACCIÓN CON LAS MANOS
+      let anguloMano = 0;
+      let cantDuplicados = 1;
+
+      if (hands.length > 0) {
+        let mano = hands[0];
+        // Usamos la punta del dedo índice (punto 8) como "puntero"
+        let indice = mano.keypoints[8]; 
+        
+        // Mapeamos la X del dedo (0 al ancho del video) a un ángulo (-35 a 35 grados)
+        anguloMano = map(indice.x, 0, video.width, -35, 35);
+        
+        // Mapeamos la Y del dedo para generar el efecto de distorsión/duplicado
+        cantDuplicados = floor(map(indice.y, 0, video.height, 1, 8));
+      }
+
+      // =======================================
+      // ZONA SUPERIOR: DIBUJO DE LA IMAGEN
+      // =======================================
+      push();
+      // Nos movemos al centro de donde debe ir la imagen
+      translate(width / 2, imgAlto / 2);
+
+      // Dibujamos la imagen, aplicando el efecto de duplicación si la mano lo dicta
+      for(let i = cantDuplicados; i > 0; i--) {
+        push();
+        // Mezclamos el movimiento automático con el de la mano
+        let anguloActual = anguloBase + (anguloMano * (i / cantDuplicados));
+        let escalaActual = escalaBase + (i * 0.015);
+        
+        rotate(anguloActual);
+        scale(escalaActual);
+        
+        // Si es una capa duplicada (i > 1), la hacemos semitransparente para un efecto "fantasma"
+        if (i > 1) {
+          tint(255, 255 / cantDuplicados);
+        } else {
+          noTint(); // Capa original sin transparencia
+        }
+        
+        image(wallpaper, 0, 0, imgAncho, imgAlto);
+        pop();
+      }
+      pop();
+
+      // =======================================
+      // ZONA INFERIOR: RECUADRO PARA INFORMACIÓN
+      // =======================================
+      // Dibujamos un rectángulo blanco sólido en la parte inferior para tapar 
+      // cualquier rotación de la imagen que se haya salido del margen.
+      fill(255);
+      noStroke();
+      rect(0, imgAlto, width, height - imgAlto);
+
+      // Dibujamos textos de ejemplo en el espacio en blanco
+      fill(0); // Texto negro
+      textAlign(CENTER, CENTER);
+      
+      let centroY = imgAlto + (height - imgAlto) / 2; // Mitad del espacio blanco
+      
+      textSize(32);
+      textStyle(BOLD);
+      text("SECCIÓN DE INFORMACIÓN", width / 2, centroY - 20);
+      
+      textSize(18);
+      textStyle(NORMAL);
+      fill(100); // Texto gris oscuro
+      text("Aquí puedes colocar todos los datos que agregarás posteriormente.", width / 2, centroY + 20);
+    }
+
+    // Callback de ml5
+    function gotHands(results) {
+      hands = results;
+    }
+    
+    // Si la ventana cambia de tamaño, ajustamos el lienzo para que no se rompa
+    function windowResized() {
+      resizeCanvas(windowWidth, windowHeight);
+    }
+  </script>
+</body>
 </html>
