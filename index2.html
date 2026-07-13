@@ -3,184 +3,209 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Interacción Completa - Manos y Rostro</title>
+  <title>Interacción Completa - Cuadrícula y Espejo</title>
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
-
   <script src="https://unpkg.com/ml5@1/dist/ml5.min.js"></script>
   
   <style>
-    body {
+    body 
+    {
       margin: 0;
       padding: 0;
       overflow: hidden;
-      background-color: #000000; 
+      background-color: #000000;
       font-family: sans-serif;
     }
-    canvas {
+    canvas 
+    {
       display: block;
     }
   </style>
 </head>
 <body>
   <script>
-
     let handPose;
     let faceMesh;
     let video;
     let hands = [];
     let faces = [];
 
+    let usarModoEspejo = false; 
+
+    let columnas = 3; 
+    let filas = 3;   
     let imagenes = [];
-    let fondoActual = 0;
-    let cambioCooldown = 0;
-    let waveAmp = 20; 
+    let celdas = [];
+    let lienzoCuadricula;
+
+    let cambioCooldown = 0; 
+    
+    let waveAmp = 10; 
     let waveFreq = 0.05; 
+    
     let smoothFaceX = 0;
     let smoothFaceY = 0;
     let isFaceInitialized = false;
 
-    function preload() {
-      handPose = ml5.handPose();
-      faceMesh = ml5.faceMesh();
+    function preload() 
+    {
+      handPose = ml5.handPose({ flipped: usarModoEspejo });
+      faceMesh = ml5.faceMesh({ flipped: usarModoEspejo });
       
-      imagenes[0] = loadImage('/assets/w1.jpg');
-      imagenes[1] = loadImage('/assets/w2.jpg');
-      imagenes[2] = loadImage('/assets/w3.jpg');
-      imagenes[3] = loadImage('/assets/w4.jpg');
-     
+      let totalDeImagenes = 4; 
+      
+      for (let i = 1; i <= totalDeImagenes; i++) 
+      {
+        imagenes.push(loadImage(`/assets/w${i}.jpg`));
+      }
     }
 
-    function setup() {
+    function setup() 
+    {
       createCanvas(windowWidth, windowHeight);
-      
       video = createCapture(VIDEO);
       video.size(windowWidth, windowHeight);
       video.hide();
-      
       handPose.detectStart(video, gotHands);
       faceMesh.detectStart(video, gotFaces);
-      
       angleMode(DEGREES);
-      imageMode(CENTER);
+      lienzoCuadricula = createGraphics(windowWidth, windowHeight);
+      
+      let totalCeldas = columnas * filas;
+      for (let i = 0; i < totalCeldas; i++) 
+      {
+        celdas.push(random(imagenes)); 
+      }
+      actualizarLienzoInvisible();
+    }
+    
+    function actualizarLienzoInvisible() 
+    {
+      let anchoCelda = lienzoCuadricula.width / columnas;
+      let altoCelda = lienzoCuadricula.height / filas;
+      let indice = 0;
+      for (let y = 0; y < filas; y++) 
+      {
+        for (let x = 0; x < columnas; x++) {
+          lienzoCuadricula.image(celdas[indice], x * anchoCelda, y * altoCelda, anchoCelda, altoCelda);
+          indice++;
+        }
+      }
     }
 
-    function draw() {
+    function draw() 
+    {
       background(0);
-
       if (cambioCooldown > 0) cambioCooldown--;
-      
       let targetWaveAmp = 25;
       let targetWaveFreq = 0.04;
-
-      for (let i = 0; i < hands.length; i++) {
+      for (let i = 0; i < hands.length; i++) 
+      {
         let hand = hands[i];
         let indexFinger = hand.keypoints[8];
+
         if (hand.handedness === 'Left') {
-          if (indexFinger.x > width * 0.75 && cambioCooldown === 0) {
-            fondoActual = (fondoActual + 1) % imagenes.length; 
+          if (indexFinger.x > width * 0.75 && cambioCooldown === 0) 
+          {
+            let cantidadCambios = floor(random(2, 4)); 
+            for (let c = 0; c < cantidadCambios; c++) 
+            {
+              let celdaAlAzar = floor(random(celdas.length));
+              celdas[celdaAlAzar] = random(imagenes);
+            }
+            actualizarLienzoInvisible(); 
             cambioCooldown = 60; 
           }
         }
-        
-        if (hand.handedness === 'Right') {
-          
+
+        if (hand.handedness === 'Right') 
+        {
           targetWaveAmp = map(indexFinger.y, 0, height, 150, 0, true); 
-         
           targetWaveFreq = map(indexFinger.x, 0, width, 0.01, 0.15, true);
         }
       }
+
       waveAmp = lerp(waveAmp, targetWaveAmp, 0.04);
       waveFreq = lerp(waveFreq, targetWaveFreq, 0.04);
 
-      let img = imagenes[fondoActual];
-      
-      let scaleFactor = Math.max(width / img.width, height / img.height);
-      let drawW = img.width * scaleFactor;
-      let drawH = img.height * scaleFactor;
-      
-      let escalaBase = 1 + sin(frameCount * 0.5) * 0.02;
+      let escalaBase = 1 + sin(frameCount * 0.5) * 0.08;
 
       push();
-
       imageMode(CORNER); 
       translate(width / 2, height / 2); 
-      scale(escalaBase); 
+      scale(escalaBase);
       
       let numStrips = 50; 
-      let stripH = drawH / numStrips;
-      let sourceH = img.height / numStrips;
-      
-      let startX = -drawW / 2;
-      let startY = -drawH / 2;
+      let stripH = height / numStrips; 
+      let startX = -width / 2;
+      let startY = -height / 2;
 
-      for (let i = 0; i < numStrips; i++) {
-
+      for (let i = 0; i < numStrips; i++) 
+      {
         let xOffset = sin(frameCount * (waveFreq * 10) + (i * 0.5)) * waveAmp;
-        
         image(
-          img, 
-          startX + xOffset, startY + (i * stripH), drawW, stripH,
-          0, i * sourceH, img.width, sourceH
+          lienzoCuadricula, startX + xOffset, startY + (i * stripH), width, stripH,
+          0, i * stripH, width, stripH
         );
       }
       pop();
 
-      if (faces.length > 0) {
+      if (faces.length > 0) 
+      {
         let cara = faces[0];
-        
         let targetFaceX = cara.box.xMin + (cara.box.width / 2);
         let targetFaceY = cara.box.yMin; 
-      
-        if (!isFaceInitialized) {
+        if (!isFaceInitialized) 
+        {
             smoothFaceX = targetFaceX;
             smoothFaceY = targetFaceY;
             isFaceInitialized = true;
-        } else {
-  
+        } else 
+        {
             smoothFaceX = lerp(smoothFaceX, targetFaceX, 0.15);
             smoothFaceY = lerp(smoothFaceY, targetFaceY, 0.15);
         }
         
         let textoOffset = sin(frameCount * 2) * 5;
+
         push();
-        translate(smoothFaceX, smoothFaceY - 50 + textoOffset); 
-        
+        translate(smoothFaceX, smoothFaceY - 50 + textoOffset);
         fill(255, 255, 255, 200); 
         noStroke();
         rectMode(CENTER);
         rect(0, 0, 300, 60, 15); 
-        
         fill(0); 
         textAlign(CENTER, CENTER);
         textSize(18);
         textStyle(BOLD);
-        text("¡Hola! Esta es tu información", 0, -10);
-        
+        text("Estos dibujos no son de nuestra propiedad", 0, -10);
         textSize(14);
-        textStyle(NORMAL);
+        /*textStyle(NORMAL);
         fill(50);
-        text("Imagen actual: " + (fondoActual + 1) + " de " + imagenes.length, 0, 12);
-        
+        text("Fondo actual: Cuadrícula " + columnas + "x" + filas, 0, 12);*/
         pop();
-      } else {
+
+      } else 
+      {
         isFaceInitialized = false; 
       }
     }
-    function gotHands(results) {
-      hands = results;
-    }
-    function gotFaces(results) {
-      faces = results;
-    }
+
+    function gotHands(results) { hands = results; }
+    function gotFaces(results) { faces = results; }
     
-  
-    function windowResized() {
+    function windowResized() 
+    {
       resizeCanvas(windowWidth, windowHeight);
-      if (video) {
+      lienzoCuadricula = createGraphics(windowWidth, windowHeight);
+      actualizarLienzoInvisible();
+      if (video) 
+      {
         video.size(windowWidth, windowHeight);
       }
     }
+
   </script>
 </body>
 </html>

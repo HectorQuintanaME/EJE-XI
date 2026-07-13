@@ -6,16 +6,19 @@
     <title>Lienzo de Dibujo Interactivo - Caleidoscopio</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body {
+        body 
+        {
             overscroll-behavior: none;
             touch-action: none;
         }
         
-        #drawing-canvas {
-            cursor: crosshair;
+        #drawing-canvas 
+        {
+            cursor: crosshair; 
         }
         
-        .google-modal {
+        .google-modal 
+        {
             box-shadow: 0 24px 38px 3px rgba(0,0,0,0.14), 0 9px 46px 8px rgba(0,0,0,0.12), 0 11px 15px -7px rgba(0,0,0,0.2);
             border-radius: 8px;
         }
@@ -23,22 +26,179 @@
         .hidden { display: none !important; }
     </style>
 </head>
-<body class="bg-gray-900 h-screen w-screen overflow-hidden flex flex-col font-sans">
+<body class="bg-gray-950 h-screen w-screen overflow-hidden flex flex-col font-sans">
 
     <div id="tc-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 transition-opacity">
         <div class="bg-white google-modal p-8 max-w-md w-11/12 text-gray-800">
-            <h2 class="text-2xl font-normal mb-4">Términos y Condiciones</h2>
+            <h2 class="text-2xl font-bold mb-4">¡Hola! Bienvenidos a Caleidoscopio</h2>
+            <p class="mb-4 text-sm font-medium">Antes de iniciar me gustaría que aceptes los siguientes términos y condiciones:</p>
             <div class="text-sm text-gray-600 mb-6 h-40 overflow-y-auto border border-gray-200 p-3 rounded">
-                <p class="mb-2">Bienvenido a la experiencia Caleidoscopio.</p>
-                <p class="mb-2">Intenta replicar la imagen de fondo usando las herramientas de simetría y fusión. Al terminar, tu arte base será evaluado.</p>
-                <p class="mb-2">Al utilizar esta herramienta, aceptas que los dibujos realizados serán almacenados en nuestros servidores para análisis y uso en proyectos creativos posteriores.</p>
-                <p>Por favor, asegúrate de no compartir información personal o sensible.</p>
+                
+                <p class="mb-2">
+                    <strong>AVISO PREVIO A LA LECTURA DE LOS TÉRMINOS Y CONDICIONES</strong><br>
+                    Antes de continuar, le informamos que el acceso a las funcionalidades, servicios, contenidos, elementos visuales, recursos digitales, mecanismos interactivos, componentes multimedia, sistemas de navegación, herramientas de participación y demás características presentes dentro de esta plataforma se encuentra sujeto a la lectura, comprensión y aceptación de los presentes Términos y Condiciones de Uso.
+                    Con el objetivo de garantizar la transparencia de nuestros procesos, la protección de los derechos de los usuarios, la adecuada administración de los recursos tecnológicos y el cumplimiento de las disposiciones aplicables, hemos preparado el siguiente documento, el cual contiene información relevante respecto a las condiciones bajo las cuales se desarrollará cualquier interacción entre usted y esta plataforma.
+                    Le recomendamos dedicar el tiempo suficiente para leer cuidadosamente cada apartado, inciso, subinciso, referencia, aclaración, observación, nota complementaria, disposición transitoria, comentario explicativo y cualquier otro elemento textual incluido en este documento.
+                    La lectura completa de los presentes términos le permitirá comprender con mayor precisión el alcance de sus derechos, responsabilidades, obligaciones, limitaciones, autorizaciones, consentimientos, renuncias voluntarias, renuncias involuntarias, posibles renuncias futuras y demás aspectos derivados del uso de la plataforma.
+                    Asimismo, se recomienda realizar la lectura en un entorno tranquilo, con iluminación adecuada, disponibilidad de tiempo suficiente y, de ser posible, una bebida hidratante de su preferencia.
+                    Diversos estudios demuestran que la lectura prolongada de documentos jurídicos puede generar una ligera sensación de cansancio, confusión o cuestionamientos existenciales respecto a la naturaleza de los contratos digitales modernos. Dichos efectos son completamente normales y no afectan la validez de la aceptación posterior.
+                    Al continuar, usted reconoce que dispone de la capacidad necesaria para revisar la totalidad del presente documento, incluyendo aquellas secciones que podrían parecer repetitivas, excesivamente específicas o sorprendentemente extensas.
+                    La plataforma celebra y fomenta la lectura responsable de todos sus documentos legales.
+                    De hecho, creemos firmemente en la importancia de leer cada palabra. <br>
+                    Absolutamente cada palabra. <br>
+                    Sin excepción. <br>
+                    Especialmente esta. <br>
+                    Y esta otra. <br>
+                    Y esta también. <br>
+                    De hecho, si ha llegado hasta este punto, probablemente ya ha dedicado más tiempo a este aviso preliminar que el promedio de los usuarios dedica a la lectura completa de unos términos y condiciones convencionales. <br>
+                    Lo cual resulta admirable. <br>
+                    Aunque también ligeramente preocupante. <br>
+                    Por favor continúe. <br>
+                    Todavía no comienzan los términos. <br>
+                    <strong>INFORMACIÓN IMPORTANTE SOBRE LA INFORMACIÓN IMPORTANTE</strong><br>
+                    Antes de proceder a la lectura de los Términos y Condiciones, es importante que usted comprenda la importancia de los Términos y Condiciones que está a punto de leer.
+                    Los presentes Términos y Condiciones han sido diseñados para proporcionar información relacionada con las condiciones que regulan el acceso a la plataforma y las condiciones relacionadas con dichas condiciones.
+                    Por motivos de claridad, transparencia y exceso de precaución administrativa, hemos decidido informar previamente que la información contenida en los siguientes apartados contiene información.
+                    En consecuencia, se recomienda prestar atención a la información informativa aquí descrita. <br>
+                    <strong>Declaración de voluntad de lectura</strong><br>
+                    Al continuar desplazándose hacia abajo, usted manifiesta su intención preliminar de considerar la posibilidad de evaluar la conveniencia de leer el documento que se presenta a continuación.
+                    Dicha intención preliminar no constituye una obligación definitiva de lectura.
+                    Sin embargo, constituye una manifestación razonable de apertura conceptual hacia una potencial lectura futura. <br>
+                    <strong>Riesgos asociados a la lectura</strong><br>
+                    La lectura de documentos legales puede producir:
+                    •Bostezos. <br>
+                    •Fatiga ocular. <br>
+                    •Desplazamiento excesivo de la rueda del mouse. <br>
+                    •Crisis de fe en la humanidad. <br>
+                    •Pensamientos como: "Seguro esto no es tan importante." o "Nadie lee estas cosas." o incluso "¿Cuánto falta?" <br>
+                     
+                    <!--espacioooooo seguir aqui -->
+                    Estadísticas de lectura
+Según datos recopilados por fuentes que preferimos no especificar:
+•
+El 87% de los usuarios no lee los términos.
+•
+El 10% comienza a leerlos.
+•
+El 2% llega a la segunda página.
+•
+El 0.9% intenta comprenderlos.
+•
+El 0.1% llega hasta esta sección.
+•
+El 0.01% comienza a sospechar que el documento está perdiendo seriedad.
+Declaración de confianza mutua
+La plataforma confía plenamente en que usted leerá cada palabra.
+Usted confía plenamente en que la plataforma no hará nada extraño.
+Ambas partes son conscientes de que ninguna de las dos afirmaciones anteriores es completamente cierta.
+No obstante, procederemos como si lo fueran.
+TÉRMINOS Y CONDICIONES DE USO
+(Ahora sí comienzan. De verdad.)
+Felicidades.
+Ha superado exitosamente el Aviso Previo a la Lectura de los Términos y Condiciones.
+No todos llegan hasta aquí.
+Muchos abandonan.
+Otros aceptan sin leer.
+Usted, en cambio, ha demostrado una admirable resistencia ante la burocracia digital.
+La plataforma reconoce dicho esfuerzo.
+No será recompensado por ello.
+1. Cesión voluntaria, libre, consciente, informada, parcialmente informada o accidental de derechos sobre las imágenes.
+Al cargar, subir, enviar, arrastrar, soltar, seleccionar, importar, exportar, copiar, pegar o permitir que una imagen llegue de cualquier forma a esta plataforma, el usuario manifiesta su voluntad expresa de conceder a los responsables del proyecto una licencia de uso amplia, suficiente y razonablemente extensa sobre dicho contenido.
+Esta licencia incluye, entre otras cosas:
+•
+Visualizar la imagen.
+•
+Almacenar la imagen.
+•
+Proyectar la imagen.
+•
+Organizar la imagen.
+•
+Mover la imagen de una carpeta a otra.
+•
+Mirarla con orgullo.
+•
+Mirarla con preocupación.
+•
+Preguntarse quién decidió subirla.
+En términos menos entretenidos:
+El usuario concede a los creadores del proyecto el derecho de utilizar las imágenes enviadas para los fines relacionados con la presente instalación artística, sus exhibiciones, documentación, registro, difusión y futuras presentaciones derivadas del mismo proyecto.
+El usuario declara que posee los derechos necesarios para compartir dicho contenido y comprende que esta autorización continuará siendo válida incluso después de haber olvidado que aceptó estos términos.
+2. Reconocimiento no remunerado de la participación.
+El usuario reconoce que la participación dentro de esta plataforma constituye una contribución voluntaria al desarrollo de la obra.
+En consecuencia, acepta que las imágenes enviadas podrán formar parte de la instalación, proyecciones, documentación, registros audiovisuales o cualquier otra modalidad de exhibición sin que ello genere obligación alguna de proporcionar:
+•
+Pago económico.
+•
+Regalías.
+•
+Bonificaciones.
+•
+Puntos.
+•
+Experiencia.
+•
+Monedas virtuales.
+•
+Skins.
+•
+Logros desbloqueables.
+•
+Diplomas.
+•
+Certificados de supervivencia administrativa.
+Asimismo, el usuario acepta que la aparición de su imagen dentro de la obra no implica necesariamente la inclusión de su nombre, créditos, agradecimientos especiales, menciones honoríficas, homenajes póstumos ni reconocimiento alguno más allá de la satisfacción emocional si es que esta llegara a producirse de haber contribuido a una experiencia artística colectiva.
+La plataforma agradece profundamente dicha colaboración.
+Profundamente.
+3. Modificación, reinterpretación, transformación y demás actos creativos razonablemente impredecibles.
+El usuario acepta que las imágenes enviadas no permanecerán necesariamente idénticas a su estado original.
+Durante el proceso de exhibición podrán ser modificadas, alteradas, transformadas, intervenidas, deformadas, reorganizadas, fragmentadas, fusionadas, superpuestas, reinterpretadas o sometidas a decisiones creativas cuya lógica podrá resultar evidente únicamente para quienes las realizaron.
+Dichas modificaciones podrán ser efectuadas por:
+•
+Los responsables del proyecto.
+•
+Otros participantes.
+•
+Procesos colaborativos.
+•
+Dinámicas propias de la instalación.
+•
+Circunstancias artísticas difíciles de explicar mediante lenguaje jurídico convencional.
+En consecuencia, el usuario renuncia expresamente al derecho de preguntar:
+"¿Pero quién hizo eso con mi imagen?"
+o
+"Yo no la subí así."
+o incluso
+"Creo que antes tenía más píxeles."
+Toda modificación será considerada parte integral del proceso creativo y deberá interpretarse como una evolución conceptual de la imagen original y no como un ataque personal contra las preferencias estéticas del usuario.
+Aceptación final
+Al permanecer en esta plataforma, desplazarse hasta el final del documento, cerrar accidentalmente esta pestaña, volver a abrirla, suspirar profundamente o simplemente continuar existiendo dentro del ecosistema digital de la presente instalación, el usuario declara haber leído, comprendido, aceptado o, cuando menos, haber desarrollado una relación de tolerancia razonable con los presentes Términos y Condiciones.
+En caso de no estar de acuerdo con alguno de los puntos anteriores, el procedimiento recomendado consiste en no subir ninguna imagen.
+Aunque, si ha llegado hasta esta línea, existe una probabilidad estadísticamente considerable de que ya haya decidido hacerlo.
+La plataforma le desea una agradable experiencia.
+Y agradece, una vez más, que probablemente no haya leído todo esto.
+                    Al utilizar esta herramienta, aceptas que los dibujos realizados serán almacenados en nuestros servidores para análisis y uso en proyectos creativos posteriores.</p>
+                <p>Por favor, asegúrate de no compartir información personal o sensible a través de tus dibujos.</p>
             </div>
             <div class="flex justify-end">
                 <button id="btn-accept-tc" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded transition-colors">
-                    Aceptar y Comenzar
+                    Aceptar
                 </button>
             </div>
+        </div>
+    </div>
+
+    <div id="instructions-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 transition-opacity">
+        <div class="bg-white google-modal p-8 max-w-md w-11/12 text-gray-800 text-center">
+            <h2 class="text-2xl font-bold mb-4">Instrucciones</h2>
+            <p class="text-sm text-gray-600 mb-6 text-left">
+                Genial, a continuación, te mostraremos una imagen, tú decides si recrear fielmente la imagen o usar tu creatividad para hacer algo un poco diferente.<br><br>
+                Arriba tienes diferentes herramientas para generar tu obra, desde cambiar el color del fondo, aumentar el tamaño del pincel, cambiar sus colores o lo más bonito y llamativo, usar colores neón que le darán otra vista a tu dibujo.<br><br>
+                Una vez terminado tu dibujo presiona <strong>“terminar”</strong> para enviar tu obra.
+            </p>
+            <button id="btn-start-drawing" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded transition-colors">
+                ¡Empezar a Dibujar!
+            </button>
         </div>
     </div>
 
@@ -80,6 +240,9 @@
             </div>
 
             <div class="flex gap-2">
+                <button id="btn-undo" class="bg-orange-100 hover:bg-orange-200 text-orange-700 border border-orange-300 text-sm font-medium py-2 px-4 rounded transition-colors" title="Deshacer último trazo">
+                    Deshacer
+                </button>
                 <button id="btn-clear" class="bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm font-medium py-2 px-4 rounded transition-colors">
                     Limpiar
                 </button>
@@ -94,6 +257,7 @@
         </div>
 
         <div class="flex-1 relative w-full h-full overflow-hidden" id="canvas-container">
+        
             <div id="bg-color-layer" class="absolute inset-0 transition-colors duration-300"></div>
             
             <img id="reference-img" class="absolute inset-0 w-full h-full object-cover pointer-events-none z-0" style="opacity: 0.5;" />
@@ -114,7 +278,7 @@
             </div>
             
             <button id="btn-restart-app" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded transition-colors">
-                Intentar otro fondo
+                Realizar otro dibujo.
             </button>
         </div>
     </div>
@@ -135,17 +299,23 @@
         const canvasContainer = document.getElementById('canvas-container');
 
         let isDrawing = false;
-        let currentColor = '#00e5ff'; 
-        let currentBgColor = '#0b0f19';
+        let currentColor = '#00e5ff';
+        let currentBgColor = '#0b0f19'; 
         let currentBrushSize = 5;
         let currentBrushOpacity = 0.8;
         let isFusionActive = true;
 
-        let rawX = 0, rawY = 0;
-        let smoothX = 0, smoothY = 0;
-        let animationFrameId;
+        let lastDrawX = 0;
+        let lastDrawY = 0;
+
+        let strokeHistory = [];
+        
+        const posiblesSimetrias = [4, 6, 8, 12];
+        const symmetry = posiblesSimetrias[Math.floor(Math.random() * posiblesSimetrias.length)];
+        const angle = (Math.PI * 2) / symmetry; 
 
         const tcModal = document.getElementById('tc-modal');
+        const instructionsModal = document.getElementById('instructions-modal');
         const appContainer = document.getElementById('app-container');
         const colorPicker = document.getElementById('color-picker');
         const bgColorPicker = document.getElementById('bg-color-picker');
@@ -153,6 +323,7 @@
         const brushOpacitySlider = document.getElementById('brush-opacity');
         const brushSize = document.getElementById('brush-size');
         const fusionModeCheckbox = document.getElementById('fusion-mode');
+        const btnUndo = document.getElementById('btn-undo');
         const btnClear = document.getElementById('btn-clear');
         const btnFinish = document.getElementById('btn-finish');
         const bgColorLayer = document.getElementById('bg-color-layer');
@@ -163,25 +334,43 @@
         const randomBgNum = Math.floor(Math.random() * 15) + 1;
         referenceImg.src = `caleidoscopios/c${randomBgNum}.jpg`;
 
-        document.getElementById('btn-accept-tc').addEventListener('click', () => {
+        function saveHistoryState() 
+        {
+            if (canvas.width > 0 && canvas.height > 0) 
+            {
+                strokeHistory.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+                if (strokeHistory.length > 15) strokeHistory.shift(); 
+            }
+        }
+
+        document.getElementById('btn-accept-tc').addEventListener('click', () => 
+        {
             tcModal.classList.add('hidden');
+            instructionsModal.classList.remove('hidden');
+        });
+
+        document.getElementById('btn-start-drawing').addEventListener('click', () => 
+        {
+            instructionsModal.classList.add('hidden');
             appContainer.classList.remove('hidden');
             appContainer.classList.add('flex');
             resizeCanvas(); 
+            saveHistoryState();
         });
 
-        function resizeCanvas() {
+        function resizeCanvas() 
+        {
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             canvas.width = canvasContainer.clientWidth;
             canvas.height = canvasContainer.clientHeight;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             if(imageData) ctx.putImageData(imageData, 0, 0);
-
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
         }
 
-        window.addEventListener('resize', () => {
+        window.addEventListener('resize', () => 
+        {
             if(!appContainer.classList.contains('hidden')) resizeCanvas();
         });
 
@@ -204,84 +393,98 @@
                 ctx.globalCompositeOperation = 'screen';
             } else {
                 ctx.shadowBlur = 0;
-                ctx.globalCompositeOperation = 'source-over'; 
+                ctx.globalCompositeOperation = 'source-over';
             }
         };
-        const drawSymmetricPoint = (px, py) => {
+
+        const drawSymmetricPoint = (px, py) => 
+        {
             applyBrushStyles();
-            const w = canvas.width;
-            const h = canvas.height;
-            const points = [
-                {x: px, y: py}, {x: w - px, y: py}, {x: px, y: h - py}, {x: w - px, y: h - py} 
-            ];
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+
+            let startX = px - cx;
+            let startY = py - cy;
             
-            points.forEach(p => {
+            for (let i = 0; i < symmetry; i++) 
+            {
+                ctx.save();
+                ctx.translate(cx, cy); 
+                ctx.rotate(i * angle); 
                 ctx.beginPath();
-                ctx.arc(p.x, p.y, currentBrushSize / 2, 0, Math.PI * 2);
+                ctx.arc(startX, startY, currentBrushSize / 2, 0, Math.PI * 2);
                 ctx.fill();
-            });
-        };
-
-        const drawSymmetricLine = (x1, y1, x2, y2) => {
-            applyBrushStyles();
-            const w = canvas.width;
-            const h = canvas.height;
-            const lines = [
-                {sx: x1, sy: y1, ex: x2, ey: y2},                     
-                {sx: w - x1, sy: y1, ex: w - x2, ey: y2},           
-                {sx: x1, sy: h - y1, ex: x2, ey: h - y2},            
-                {sx: w - x1, sy: h - y1, ex: w - x2, ey: h - y2}      
-            ];
-
-            lines.forEach(l => {
+                ctx.scale(1, -1);
                 ctx.beginPath();
-                ctx.moveTo(l.sx, l.sy);
-                ctx.lineTo(l.ex, l.ey);
-                ctx.stroke();
-            });
-        };
-
-        const renderSmooth = () => {
-            if (!isDrawing) return;
-            
-            const dx = rawX - smoothX;
-            const dy = rawY - smoothY;
-            
-            if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
-  
-                const nx = smoothX + dx * 0.55; 
-                const ny = smoothY + dy * 0.55;
-                drawSymmetricLine(smoothX, smoothY, nx, ny);
-                smoothX = nx;
-                smoothY = ny;
+                ctx.arc(startX, startY, currentBrushSize / 2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
             }
-            animationFrameId = requestAnimationFrame(renderSmooth);
         };
 
-        const startDrawing = (e) => {
+        const drawSymmetricLine = (x1, y1, x2, y2) =>
+        {
+            applyBrushStyles();
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+            let startX = x1 - cx;
+            let startY = y1 - cy;
+            let endX = x2 - cx;
+            let endY = y2 - cy;
+            for (let i = 0; i < symmetry; i++) 
+            {
+                ctx.save();
+                ctx.translate(cx, cy);
+                ctx.rotate(i * angle); 
+                ctx.beginPath();
+                ctx.moveTo(startX, startY);
+                ctx.lineTo(endX, endY);
+                ctx.stroke();
+                ctx.scale(1, -1);
+                ctx.beginPath();
+                ctx.moveTo(startX, startY);
+                ctx.lineTo(endX, endY);
+                ctx.stroke();
+                ctx.restore();
+            }
+        };
+
+        const startDrawing = (e) => 
+        {
             isDrawing = true;
             const rect = canvas.getBoundingClientRect();
-            rawX = (e.clientX || e.touches[0].clientX) - rect.left;
-            rawY = (e.clientY || e.touches[0].clientY) - rect.top;
-            
-            smoothX = rawX;
-            smoothY = rawY;
-            
-            drawSymmetricPoint(smoothX, smoothY);
-            animationFrameId = requestAnimationFrame(renderSmooth);
+            lastDrawX = (e.clientX || e.touches[0].clientX) - rect.left;
+            lastDrawY = (e.clientY || e.touches[0].clientY) - rect.top;
+            drawSymmetricPoint(lastDrawX, lastDrawY);
         };
 
-        const draw = (e) => {
+        const draw = (e) =>
+        {
             if (!isDrawing) return;
             e.preventDefault(); 
             const rect = canvas.getBoundingClientRect();
-            rawX = (e.clientX || e.touches[0].clientX) - rect.left;
-            rawY = (e.clientY || e.touches[0].clientY) - rect.top;
+            const currentX = (e.clientX || e.touches[0].clientX) - rect.left;
+            const currentY = (e.clientY || e.touches[0].clientY) - rect.top;
+            
+            const dx = currentX - lastDrawX;
+            const dy = currentY - lastDrawY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            if (distance > 3) 
+            {
+                drawSymmetricLine(lastDrawX, lastDrawY, currentX, currentY);
+                lastDrawX = currentX;
+                lastDrawY = currentY;
+            }
         };
 
-        const stopDrawing = () => {
-            isDrawing = false;
-            cancelAnimationFrame(animationFrameId);
+        const stopDrawing = () => 
+        {
+            if (isDrawing) 
+            {
+                isDrawing = false;
+                saveHistoryState();
+            }
         };
 
         canvas.addEventListener('mousedown', startDrawing);
@@ -294,8 +497,8 @@
         canvas.addEventListener('touchend', stopDrawing);
 
         colorPicker.addEventListener('input', (e) => currentColor = e.target.value);
-        
-        bgColorPicker.addEventListener('input', (e) => {
+        bgColorPicker.addEventListener('input', (e) => 
+        {
             currentBgColor = e.target.value;
             bgColorLayer.style.backgroundColor = currentBgColor;
         });
@@ -305,11 +508,25 @@
         brushSize.addEventListener('input', (e) => currentBrushSize = e.target.value);
         fusionModeCheckbox.addEventListener('change', (e) => isFusionActive = e.target.checked);
 
-        btnClear.addEventListener('click', () => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        btnUndo.addEventListener('click', () => 
+        {
+            if (strokeHistory.length > 1) 
+            {
+                strokeHistory.pop();
+                const previousState = strokeHistory[strokeHistory.length - 1];
+                ctx.putImageData(previousState, 0, 0);
+            }
         });
 
-        function generarPersonalidad() {
+        btnClear.addEventListener('click', () => 
+        {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            strokeHistory = [];
+            saveHistoryState();
+        });
+
+        function generarPersonalidad() 
+        {
             const p1 = listaEstadoAnimo[Math.floor(Math.random() * listaEstadoAnimo.length)];
             const p2 = listaEnfoque[Math.floor(Math.random() * listaEnfoque.length)];
             const p3 = listaEnergia[Math.floor(Math.random() * listaEnergia.length)];
@@ -320,7 +537,8 @@
         const resultModal = document.getElementById('result-modal');
         const personalityWordsContainer = document.getElementById('personality-words');
 
-        btnFinish.addEventListener('click', async () => {
+        btnFinish.addEventListener('click', async () => 
+        {
             btnFinish.disabled = true;
             loadingSpinner.classList.remove('hidden');
 
@@ -332,12 +550,12 @@
                 
                 tempCtx.fillStyle = currentBgColor;
                 tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-
+                
                 tempCtx.drawImage(canvas, 0, 0);
 
-                tempCanvas.toBlob(async (blob) => {
+                tempCanvas.toBlob(async (blob) => 
+                {
                     if (!blob) throw new Error("No se pudo procesar la imagen del lienzo.");
-                    
                     const nombreArchivo = `dibujo_${Date.now()}_${Math.floor(Math.random() * 1000)}.jpg`;
                     const { data, error } = await supabase.storage
                         .from('dibujos-usuarios') 
@@ -372,7 +590,8 @@
 
                 }, 'image/jpeg', 0.8); 
 
-            } catch (error) {
+            } catch (error) 
+            {
                 console.error("Error inesperado: ", error);
                 alert("Ocurrió un error. Inténtalo de nuevo.");
                 btnFinish.disabled = false;
