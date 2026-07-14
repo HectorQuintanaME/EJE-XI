@@ -3,60 +3,71 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Interacción Completa - Cuadrícula y Espejo</title>
+  <title>Instalación - Rostro y Cuadrícula Estática</title>
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
   <script src="https://unpkg.com/ml5@1/dist/ml5.min.js"></script>
   
   <style>
-    body 
-    {
+    body {
       margin: 0;
       padding: 0;
       overflow: hidden;
       background-color: #000000;
       font-family: sans-serif;
     }
-    canvas 
-    {
+    canvas {
       display: block;
     }
   </style>
 </head>
 <body>
   <script>
-    let handPose;
     let faceMesh;
-    let video;
-    let hands = [];
     let faces = [];
+    let video;
+    let modeloIniciado = false;
 
     let usarModoEspejo = true; 
 
-    let columnas = 3; 
-    let filas = 3;   
+    let columnas = 10; 
+    let filas = 10;    
     let imagenes = [];
-    let celdas = [];
-    let lienzoCuadricula;
+    
+    let celdas = [];          
+    let estadoInvertido = [];
 
-    let cambioCooldown = 0; 
-    
-    let waveAmp = 10; 
-    let waveFreq = 0.05; 
-    
+    let lienzoCuadricula; 
+
     let smoothFaceX = 0;
     let smoothFaceY = 0;
     let isFaceInitialized = false;
+    let ultimaCeldaCentro = -1; 
+
+    let ultimoCambio = 0; 
+    let fraseActual = "";
+    
+    let frases = [
+      "Gracias por tu trabajo",
+      "El valor de esta instalación depende de tu participación",
+      "¿Aceptaste los términos y condiciones?",
+      "Mientras tú creas, nosotros crecemos",
+      "Tu participación mantiene esta plataforma en funcionamiento",
+      "¡Anímate! Tu dibujo alimenta este sistema",
+      "¿Qué obtienes a cambio de tu contenido?",
+      "¿En qué momento dejó de ser solo tuyo?",
+      "Este contenido fue creado por un usuario, no por esta plataforma",
+      "Tus datos son nuestro principal activo",
+      "La privacidad es una ilusión en la era digital",
+      "¿Eres el usuario o eres el producto?",
+      "Cada movimiento tuyo alimenta el algoritmo"
+    ];
 
     function preload() 
     {
-      handPose = ml5.handPose({ flipped: usarModoEspejo });
       faceMesh = ml5.faceMesh({ flipped: usarModoEspejo });
-      
-      let totalDeImagenes = 4; 
-      
-      for (let i = 1; i <= totalDeImagenes; i++) 
-      {
+      let totalDeImagenes = 130;
+      for (let i = 1; i <= totalDeImagenes; i++) {
         imagenes.push(loadImage(`/assets/w${i}.jpg`));
       }
     }
@@ -64,148 +75,157 @@
     function setup() 
     {
       createCanvas(windowWidth, windowHeight);
-      video = createCapture(VIDEO);
+      video = createCapture(VIDEO, () => {
+        console.log("Cámara lista. Iniciando FaceMesh...");
+        faceMesh.detectStart(video, gotFaces);
+        modeloIniciado = true;
+      });
       video.size(windowWidth, windowHeight);
       video.hide();
-      handPose.detectStart(video, gotHands);
-      faceMesh.detectStart(video, gotFaces);
-      angleMode(DEGREES);
       lienzoCuadricula = createGraphics(windowWidth, windowHeight);
-      
       let totalCeldas = columnas * filas;
       for (let i = 0; i < totalCeldas; i++) 
       {
         celdas.push(random(imagenes)); 
+        estadoInvertido.push(false);
       }
-      actualizarLienzoInvisible();
+      fraseActual = random(frases);
+      actualizarLienzosInvisibles();
     }
-    
-    function actualizarLienzoInvisible() 
+
+    function actualizarLienzosInvisibles() 
     {
-      let anchoCelda = lienzoCuadricula.width / columnas;
-      let altoCelda = lienzoCuadricula.height / filas;
+      let anchoCelda = width / columnas;
+      let altoCelda = height / filas;
       let indice = 0;
       for (let y = 0; y < filas; y++) 
       {
-        for (let x = 0; x < columnas; x++) {
+        for (let x = 0; x < columnas; x++) 
+        {
+          if (estadoInvertido[indice]) 
+          {
+            lienzoCuadricula.drawingContext.filter = 'invert(100%)';
+          } 
+          else 
+          {
+            lienzoCuadricula.drawingContext.filter = 'none';
+          }
+          
           lienzoCuadricula.image(celdas[indice], x * anchoCelda, y * altoCelda, anchoCelda, altoCelda);
           indice++;
         }
       }
+      lienzoCuadricula.drawingContext.filter = 'none'; 
     }
 
     function draw() 
     {
       background(0);
-      if (cambioCooldown > 0) cambioCooldown--;
-      let targetWaveAmp = 25;
-      let targetWaveFreq = 0.04;
-      for (let i = 0; i < hands.length; i++) 
-      {
-        let hand = hands[i];
-        let indexFinger = hand.keypoints[8];
-
-        if (hand.handedness === 'Left') {
-          if (indexFinger.x > width * 0.75 && cambioCooldown === 0) 
-          {
-            let cantidadCambios = floor(random(2, 4)); 
-            for (let c = 0; c < cantidadCambios; c++) 
-            {
-              let celdaAlAzar = floor(random(celdas.length));
-              celdas[celdaAlAzar] = random(imagenes);
-            }
-            actualizarLienzoInvisible(); 
-            cambioCooldown = 60; 
-          }
-        }
-
-        if (hand.handedness === 'Right') 
+      if (millis() - ultimoCambio > 5000) 
+      { 
+        fraseActual = random(frases);        
+        let cantidadCambios = floor(random(40, 50)); 
+        for (let c = 0; c < cantidadCambios; c++) 
         {
-          targetWaveAmp = map(indexFinger.y, 0, height, 150, 0, true); 
-          targetWaveFreq = map(indexFinger.x, 0, width, 0.01, 0.15, true);
-        }
+          let celdaAlAzar = floor(random(celdas.length));         
+          celdas[celdaAlAzar] = random(imagenes);
+          estadoInvertido[celdaAlAzar] = false; 
+        }       
+        actualizarLienzosInvisibles(); 
+        ultimoCambio = millis();
       }
 
-      waveAmp = lerp(waveAmp, targetWaveAmp, 0.04);
-      waveFreq = lerp(waveFreq, targetWaveFreq, 0.04);
-
-      let escalaBase = 1 + sin(frameCount * 0.5) * 0.08;
-
-      push();
-      imageMode(CORNER); 
-      translate(width / 2, height / 2); 
-      scale(escalaBase);
-      
-      let numStrips = 50; 
-      let stripH = height / numStrips; 
-      let startX = -width / 2;
-      let startY = -height / 2;
-
-      for (let i = 0; i < numStrips; i++) 
-      {
-        let xOffset = sin(frameCount * (waveFreq * 10) + (i * 0.5)) * waveAmp;
-        image(
-          lienzoCuadricula, startX + xOffset, startY + (i * stripH), width, stripH,
-          0, i * stripH, width, stripH
-        );
-      }
-      pop();
-
+      image(lienzoCuadricula, 0, 0);
       if (faces.length > 0) 
       {
         let cara = faces[0];
         let targetFaceX = cara.box.xMin + (cara.box.width / 2);
-        let targetFaceY = cara.box.yMin; 
-        if (!isFaceInitialized) 
-        {
+        let targetFaceY = cara.box.yMin + (cara.box.height / 2);        
+        if (!isFaceInitialized) {
             smoothFaceX = targetFaceX;
             smoothFaceY = targetFaceY;
             isFaceInitialized = true;
-        } else 
+        } 
+        else 
         {
             smoothFaceX = lerp(smoothFaceX, targetFaceX, 0.15);
             smoothFaceY = lerp(smoothFaceY, targetFaceY, 0.15);
+        }     
+        let anchoCelda = width / columnas;
+        let altoCelda = height / filas;
+        let centroCol = floor(smoothFaceX / anchoCelda);
+        let centroRow = floor(smoothFaceY / altoCelda);
+        let indiceActual = centroRow * columnas + centroCol;
+        if (indiceActual !== ultimaCeldaCentro && indiceActual >= 0 && indiceActual < celdas.length) 
+        {
+          ultimaCeldaCentro = indiceActual;
+
+          for (let r = centroRow - 1; r <= centroRow + 1; r++) 
+          {
+            for (let c = centroCol - 1; c <= centroCol + 1; c++) 
+            {            
+              if (r >= 0 && r < filas && c >= 0 && c < columnas) 
+              {
+                let idx = r * columnas + c;               
+                estadoInvertido[idx] = !estadoInvertido[idx];
+              }
+            }
+          }
+          actualizarLienzosInvisibles(); 
         }
-        
-        let textoOffset = sin(frameCount * 2) * 5;
+
+        let anchoRecuadro = anchoCelda * 3;
+        let altoRecuadro = altoCelda * 3;
+        let posX = smoothFaceX - (anchoRecuadro / 2);
+        let posY = smoothFaceY - (altoRecuadro / 2);
 
         push();
-        translate(smoothFaceX, smoothFaceY - 50 + textoOffset);
-        fill(255, 255, 255, 200); 
+        fill(0, 0, 0, 150);
         noStroke();
-        rectMode(CENTER);
-        rect(0, 0, 300, 60, 15); 
-        fill(0); 
-        textAlign(CENTER, CENTER);
-        textSize(18);
-        textStyle(BOLD);
-        text("Estos dibujos no son de nuestra propiedad", 0, -10);
-        textSize(14);
-        /*textStyle(NORMAL);
-        fill(50);
-        text("Fondo actual: Cuadrícula " + columnas + "x" + filas, 0, 12);*/
-        pop();
+        rect(posX, posY, anchoRecuadro, altoRecuadro);
 
-      } else 
+        fill(255); 
+        textAlign(CENTER, CENTER);
+        
+        let tamanoTexto = altoRecuadro * 0.15; 
+        textSize(min(tamanoTexto, 32)); 
+        textStyle(BOLD);
+        rectMode(CENTER);
+        
+        text(fraseActual, smoothFaceX, smoothFaceY, anchoRecuadro * 0.9, altoRecuadro * 0.9);
+        pop();
+        
+      } 
+      else 
       {
         isFaceInitialized = false; 
+        ultimaCeldaCentro = -1;       
+        if (!modeloIniciado) {
+          push();
+          fill(0, 0, 0, 200);
+          rect(0, 0, width, height);
+          fill(255);
+          textAlign(CENTER, CENTER);
+          textSize(24);
+          text("Iniciando cámara y reconocimiento facial...", width/2, height/2);
+          pop();
+        }
       }
     }
 
-    function gotHands(results) { hands = results; }
-    function gotFaces(results) { faces = results; }
-    
-    function windowResized() 
+    function gotFaces(results) 
     {
+      faces = results;
+    }
+    
+    function windowResized() {
       resizeCanvas(windowWidth, windowHeight);
       lienzoCuadricula = createGraphics(windowWidth, windowHeight);
-      actualizarLienzoInvisible();
-      if (video) 
-      {
+      actualizarLienzosInvisibles();
+      if (video) {
         video.size(windowWidth, windowHeight);
       }
     }
-
   </script>
 </body>
 </html>
