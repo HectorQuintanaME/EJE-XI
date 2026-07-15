@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Instalación - Rostro y Cuadrícula Estática</title>
+  <title>Instalación - Dedo Índice y Cuadrícula Estática</title>
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
   <script src="https://unpkg.com/ml5@1/dist/ml5.min.js"></script>
@@ -23,30 +23,30 @@
 </head>
 <body>
   <script>
-    let faceMesh;
-    let faces = [];
+    let handPose;
+    let hands = [];
     let video;
     let modeloIniciado = false;
-
-    let usarModoEspejo = true; 
+    let usarModoEspejo = false; 
 
     let columnas = 10; 
     let filas = 10;    
     let imagenes = [];
     
     let celdas = [];          
-    let estadoInvertido = [];
+    let estadoFiltro = []; 
 
     let lienzoCuadricula; 
 
-    let smoothFaceX = 0;
-    let smoothFaceY = 0;
-    let isFaceInitialized = false;
+    let smoothHandX = 0;
+    let smoothHandY = 0;
+    let isHandInitialized = false;
     let ultimaCeldaCentro = -1; 
 
     let ultimoCambio = 0; 
     let fraseActual = "";
     
+    // Lista de frases 
     let frases = [
       "Gracias por tu trabajo",
       "El valor de esta instalación depende de tu participación",
@@ -60,13 +60,13 @@
       "Tus datos son nuestro principal activo",
       "La privacidad es una ilusión en la era digital",
       "¿Eres el usuario o eres el producto?",
-      "Cada movimiento tuyo alimenta el algoritmo"
+      "Cada movimiento tuyo alimenta el algoritmo",
     ];
 
     function preload() 
     {
-      faceMesh = ml5.faceMesh({ flipped: usarModoEspejo });
-      let totalDeImagenes = 130;
+      handPose = ml5.handPose({ flipped: usarModoEspejo });
+      let totalDeImagenes = 131; 
       for (let i = 1; i <= totalDeImagenes; i++) {
         imagenes.push(loadImage(`/assets/w${i}.jpg`));
       }
@@ -75,9 +75,9 @@
     function setup() 
     {
       createCanvas(windowWidth, windowHeight);
-      video = createCapture(VIDEO, () => {
-        console.log("Cámara lista. Iniciando FaceMesh...");
-        faceMesh.detectStart(video, gotFaces);
+      video = createCapture(VIDEO, () => 
+      {
+        handPose.detectStart(video, gotHands);
         modeloIniciado = true;
       });
       video.size(windowWidth, windowHeight);
@@ -87,8 +87,8 @@
       for (let i = 0; i < totalCeldas; i++) 
       {
         celdas.push(random(imagenes)); 
-        estadoInvertido.push(false);
-      }
+        estadoFiltro.push(false); 
+      }      
       fraseActual = random(frases);
       actualizarLienzosInvisibles();
     }
@@ -102,15 +102,13 @@
       {
         for (let x = 0; x < columnas; x++) 
         {
-          if (estadoInvertido[indice]) 
+          if (estadoFiltro[indice]) 
           {
-            lienzoCuadricula.drawingContext.filter = 'invert(100%)';
-          } 
-          else 
+            lienzoCuadricula.drawingContext.filter = 'blur(6px) saturate(200%) contrast(150%)';
+          } else 
           {
-            lienzoCuadricula.drawingContext.filter = 'none';
+            lienzoCuadricula.drawingContext.filter = 'none'; 
           }
-          
           lienzoCuadricula.image(celdas[indice], x * anchoCelda, y * altoCelda, anchoCelda, altoCelda);
           indice++;
         }
@@ -121,104 +119,115 @@
     function draw() 
     {
       background(0);
-      if (millis() - ultimoCambio > 5000) 
-      { 
-        fraseActual = random(frases);        
-        let cantidadCambios = floor(random(40, 50)); 
+      if (millis() - ultimoCambio > 1000)
+       { 
+        fraseActual = random(frases);       
+        let cantidadCambios = floor(random(100, 150)); 
         for (let c = 0; c < cantidadCambios; c++) 
         {
           let celdaAlAzar = floor(random(celdas.length));         
           celdas[celdaAlAzar] = random(imagenes);
-          estadoInvertido[celdaAlAzar] = false; 
-        }       
+          estadoFiltro[celdaAlAzar] = false; 
+        }        
         actualizarLienzosInvisibles(); 
         ultimoCambio = millis();
       }
-
       image(lienzoCuadricula, 0, 0);
-      if (faces.length > 0) 
+
+      if (hands.length > 0) 
       {
-        let cara = faces[0];
-        let targetFaceX = cara.box.xMin + (cara.box.width / 2);
-        let targetFaceY = cara.box.yMin + (cara.box.height / 2);        
-        if (!isFaceInitialized) {
-            smoothFaceX = targetFaceX;
-            smoothFaceY = targetFaceY;
-            isFaceInitialized = true;
-        } 
-        else 
+        let hand = hands[0];
+        let indexFinger = hand.keypoints[8];        
+        let targetHandX = indexFinger.x;
+        let targetHandY = indexFinger.y; 
+
+        if (!isHandInitialized)
         {
-            smoothFaceX = lerp(smoothFaceX, targetFaceX, 0.15);
-            smoothFaceY = lerp(smoothFaceY, targetFaceY, 0.15);
-        }     
+            smoothHandX = targetHandX;
+            smoothHandY = targetHandY;
+            isHandInitialized = true;
+        } else 
+        {
+            smoothHandX = lerp(smoothHandX, targetHandX, 0.15);
+            smoothHandY = lerp(smoothHandY, targetHandY, 0.15);
+        }
+        
         let anchoCelda = width / columnas;
         let altoCelda = height / filas;
-        let centroCol = floor(smoothFaceX / anchoCelda);
-        let centroRow = floor(smoothFaceY / altoCelda);
+
+        let centroCol = floor(smoothHandX / anchoCelda);
+        let centroRow = floor(smoothHandY / altoCelda);
         let indiceActual = centroRow * columnas + centroCol;
+
         if (indiceActual !== ultimaCeldaCentro && indiceActual >= 0 && indiceActual < celdas.length) 
         {
           ultimaCeldaCentro = indiceActual;
-
           for (let r = centroRow - 1; r <= centroRow + 1; r++) 
           {
             for (let c = centroCol - 1; c <= centroCol + 1; c++) 
-            {            
-              if (r >= 0 && r < filas && c >= 0 && c < columnas) 
+            {
+              if (r >= 0 && r < filas && c >= 0 && c < columnas)
               {
-                let idx = r * columnas + c;               
-                estadoInvertido[idx] = !estadoInvertido[idx];
+                let idx = r * columnas + c;
+                estadoFiltro[idx] = !estadoFiltro[idx];
               }
             }
           }
           actualizarLienzosInvisibles(); 
         }
 
-        let anchoRecuadro = anchoCelda * 3;
+        let anchoRecuadro = anchoCelda * 4;
         let altoRecuadro = altoCelda * 3;
-        let posX = smoothFaceX - (anchoRecuadro / 2);
-        let posY = smoothFaceY - (altoRecuadro / 2);
 
         push();
-        fill(0, 0, 0, 150);
-        noStroke();
-        rect(posX, posY, anchoRecuadro, altoRecuadro);
+        translate(smoothHandX, smoothHandY);
+        scale(1, altoRecuadro / anchoRecuadro);
 
+        let grad = drawingContext.createRadialGradient(0, 0, 0, 0, 0, anchoRecuadro / 1.5);
+        grad.addColorStop(0, 'rgba(0, 0, 0, 0.8)');
+        grad.addColorStop(0.6, 'rgba(0, 0, 0, 0.60)');
+        grad.addColorStop(1, 'rgba(0, 0, 0, 0)');   
+        drawingContext.fillStyle = grad;
+        noStroke();
+        
+        ellipse(0, 0, anchoRecuadro * 1.5, anchoRecuadro * 1.5);
+        pop();
+        push();
         fill(255); 
         textAlign(CENTER, CENTER);
         
         let tamanoTexto = altoRecuadro * 0.15; 
         textSize(min(tamanoTexto, 32)); 
         textStyle(BOLD);
-        rectMode(CENTER);
-        
-        text(fraseActual, smoothFaceX, smoothFaceY, anchoRecuadro * 0.9, altoRecuadro * 0.9);
+        rectMode(CENTER);      
+        text(fraseActual, smoothHandX, smoothHandY, anchoRecuadro * 0.9, altoRecuadro * 0.9);
         pop();
         
-      } 
-      else 
+      } else 
       {
-        isFaceInitialized = false; 
-        ultimaCeldaCentro = -1;       
-        if (!modeloIniciado) {
+        isHandInitialized = false; 
+        ultimaCeldaCentro = -1;         
+        if (!modeloIniciado) 
+        {
           push();
           fill(0, 0, 0, 200);
           rect(0, 0, width, height);
           fill(255);
           textAlign(CENTER, CENTER);
           textSize(24);
-          text("Iniciando cámara y reconocimiento facial...", width/2, height/2);
+          text("Iniciando cámara y reconocimiento de manos...", width/2, height/2);
           pop();
         }
       }
     }
 
-    function gotFaces(results) 
+    function gotHands(results) 
     {
-      faces = results;
+      hands = results;
     }
     
-    function windowResized() {
+    function windowResized() 
+    {
       resizeCanvas(windowWidth, windowHeight);
       lienzoCuadricula = createGraphics(windowWidth, windowHeight);
       actualizarLienzosInvisibles();
